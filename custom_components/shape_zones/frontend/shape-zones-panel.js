@@ -94,14 +94,14 @@ function round(v) {
 }
 
 const CSS = `
-  :host { display: block; height: 100%; background: var(--primary-background-color); color: var(--primary-text-color); font-family: var(--ha-font-family-body, Roboto, sans-serif); }
-  .toolbar { display: flex; align-items: center; height: var(--header-height, 56px); padding: 0 12px; box-sizing: border-box;
+  :host { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: var(--primary-background-color); color: var(--primary-text-color); font-family: var(--ha-font-family-body, Roboto, sans-serif); }
+  .toolbar { flex: none; display: flex; align-items: center; height: var(--header-height, 56px); padding: 0 12px; box-sizing: border-box;
     background: var(--app-header-background-color, var(--primary-color)); color: var(--app-header-text-color, white);
     border-bottom: var(--app-header-border-bottom, none); font-size: 20px; gap: 8px; }
-  .body { display: flex; height: calc(100% - var(--header-height, 56px)); }
+  .body { flex: 1; min-height: 0; display: flex; }
   .side { width: 320px; flex: none; overflow-y: auto; padding: 16px; box-sizing: border-box;
     background: var(--card-background-color, white); border-right: 1px solid var(--divider-color, #ddd); }
-  #map { flex: 1; min-width: 0; }
+  #map { flex: 1; min-width: 0; min-height: 0; }
   :host([narrow]) .body { flex-direction: column-reverse; }
   :host([narrow]) .side { width: 100%; max-height: 45%; border-right: none; border-top: 1px solid var(--divider-color, #ddd); }
   :host([narrow]) #map { min-height: 55%; }
