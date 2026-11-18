@@ -39,7 +39,7 @@ Open **Shape Zones** in the sidebar (admins only).
 - **New zone** puts a rectangle in the middle of the map. Drag its corners into place and drag ✥ to move it.
 - Untick **Keep it a rectangle** for any other shape: drag the small dots between corners to add a corner, and right-click (or double-click) a corner to remove it.
 - Click a zone on the map or in the list to edit or delete it.
-- Switch between map and aerial photo at the top right. The map is CARTO (dark in a dark theme); in the Netherlands you also get PDOK's BRT map and high-resolution aerial photo. The choice is remembered per browser. Your trackers are shown as pink dots, Home Assistant's own zones as dashed circles.
+- Switch between map and aerial photo at the top right. The map is Esri's street map (dark grey in a dark theme); in the Netherlands PDOK's BRT map is the default and PDOK's high-resolution aerial photo is available too. The choice is remembered per browser. Your trackers are shown as pink dots, Home Assistant's own zones as dashed circles.
 
 ### By coordinates
 
@@ -95,7 +95,7 @@ triggers:
 
 ## Credits
 
-The map uses [Leaflet](https://leafletjs.com) (BSD 2-Clause, included in `frontend/leaflet/`), with tiles from CARTO (OpenStreetMap data), Esri and PDOK.
+The map uses [Leaflet](https://leafletjs.com) (BSD 2-Clause, included in `frontend/leaflet/`), with tiles from Esri and PDOK (no API keys needed).
 
 ## Development
 

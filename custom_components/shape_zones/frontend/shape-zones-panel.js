@@ -242,17 +242,17 @@ class ShapeZonesPanel extends HTMLElement {
     const conf = this._hass.config;
     const map = L.map(container, { maxZoom: 21 });
     const dark = !!this._hass.themes?.darkMode;
-    // OpenStreetMap's own tile servers block apps that send no Referer (as HA does),
-    // so use CARTO (also used by HA's map card) and, in NL, PDOK.
-    const carto = L.tileLayer(
-      `https://basemaps.cartocdn.com/${dark ? "dark_all" : "rastertiles/voyager"}/{z}/{x}/{y}{r}.png`,
-      {
-        maxNativeZoom: 20,
+    // No-key raster maps only: OpenStreetMap's own servers block requests without a
+    // Referer (HA sends none) and CARTO now needs an API key.
+    const esriTile = (service, maxNativeZoom) =>
+      L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/${service}/MapServer/tile/{z}/{y}/{x}`, {
+        maxNativeZoom,
         maxZoom: 21,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      }
-    );
+        attribution: "Tiles &copy; Esri",
+      });
+    const streets = dark
+      ? L.layerGroup([esriTile("Canvas/World_Dark_Gray_Base", 16), esriTile("Canvas/World_Dark_Gray_Reference", 16)])
+      : esriTile("World_Street_Map", 19);
     const brt = L.tileLayer(
       "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png",
       { minZoom: 6, maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; <a href="https://www.kadaster.nl">Kadaster</a> / PDOK' }
@@ -266,7 +266,7 @@ class ShapeZonesPanel extends HTMLElement {
       { minZoom: 6, maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; <a href="https://www.pdok.nl/">PDOK</a> Beeldmateriaal.nl' }
     );
     const nl = conf.country === "NL";
-    const layers = { [this._t("map")]: carto };
+    const layers = { [this._t("map")]: streets };
     if (nl) layers[this._t("map_nl")] = brt;
     layers[this._t("aerial")] = esri;
     if (nl) layers[this._t("aerial_nl")] = pdok;
@@ -278,7 +278,7 @@ class ShapeZonesPanel extends HTMLElement {
     } catch (_err) {
       // storage unavailable: fall back to the default
     }
-    (layers[saved] || carto).addTo(map);
+    (layers[saved] || (nl ? brt : streets)).addTo(map);
     map.on("baselayerchange", (ev) => {
       try {
         localStorage.setItem("shape_zones_layer", ev.name);
