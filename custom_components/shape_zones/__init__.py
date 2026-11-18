@@ -31,7 +31,7 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 PANEL_URL_PATH = "shape-zones"
 STATIC_URL = "/shape_zones_static"
 FRONTEND_DIR = Path(__file__).parent / "frontend"
-VERSION = "0.2.5"
+VERSION = "0.2.6"
 
 
 @dataclass

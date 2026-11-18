@@ -23,7 +23,6 @@ const STRINGS = {
     err_not_set_up: "Shape Zones is not set up yet. Add the integration first.",
     saved: "Saved",
     map: "Map",
-    map_nl: "Map (NL, PDOK)",
     aerial: "Aerial photo",
     aerial_nl: "Aerial photo (NL, PDOK)",
     points: "{n} corners",
@@ -49,7 +48,6 @@ const STRINGS = {
     err_not_set_up: "Shape Zones is nog niet ingesteld. Voeg eerst de integratie toe.",
     saved: "Opgeslagen",
     map: "Kaart",
-    map_nl: "Kaart (NL, PDOK)",
     aerial: "Luchtfoto",
     aerial_nl: "Luchtfoto (NL, PDOK)",
     points: "{n} hoeken",
@@ -96,6 +94,7 @@ function round(v) {
 }
 
 const CSS = `
+  :host([dark]) { --sz-control-icon-filter: invert(1); }
   :host { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: var(--primary-background-color); color: var(--primary-text-color); font-family: var(--ha-font-family-body, Roboto, sans-serif); }
   .toolbar { flex: none; display: flex; align-items: center; height: var(--header-height, 56px); padding: 0 12px; box-sizing: border-box;
     background: var(--app-header-background-color, var(--primary-color)); color: var(--app-header-text-color, white);
@@ -132,6 +131,11 @@ const CSS = `
   .zone-label { background: rgba(0,0,0,.6); color: white; border: none; box-shadow: none; font-weight: 500; }
   .zone-label::before { display: none; }
   .leaflet-container { font: inherit; }
+  .leaflet-bar a, .leaflet-control-layers, .leaflet-control-attribution, .leaflet-control-scale-line {
+    background: var(--card-background-color, white); color: var(--primary-text-color, #333); border-color: var(--divider-color, #ccc); }
+  .leaflet-bar a:hover { background: var(--secondary-background-color, #f4f4f4); }
+  .leaflet-control-attribution a { color: var(--primary-color); }
+  .leaflet-control-layers-toggle { filter: var(--sz-control-icon-filter, none); }
   .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.85); }
 `;
 
@@ -243,6 +247,7 @@ class ShapeZonesPanel extends HTMLElement {
     const conf = this._hass.config;
     const map = L.map(container, { maxZoom: 21 });
     const dark = !!this._hass.themes?.darkMode;
+    this.toggleAttribute("dark", dark);
     // No-key raster maps only: OpenStreetMap's own servers block requests without a
     // Referer (HA sends none) and CARTO now needs an API key.
     const esriTile = (service, maxNativeZoom) =>
@@ -274,8 +279,8 @@ class ShapeZonesPanel extends HTMLElement {
       { minZoom: 6, maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; <a href="https://www.pdok.nl/">PDOK</a> Beeldmateriaal.nl' }
     );
     const nl = conf.country === "NL";
-    const layers = { [this._t("map")]: streets };
-    if (nl) layers[this._t("map_nl")] = brt;
+    // In the Netherlands the PDOK (Kadaster) map is the map; elsewhere Esri's street map.
+    const layers = { [this._t("map")]: nl ? brt : streets };
     layers[this._t("aerial")] = esri;
     if (nl) layers[this._t("aerial_nl")] = pdok;
 
@@ -286,7 +291,7 @@ class ShapeZonesPanel extends HTMLElement {
     } catch (_err) {
       // storage unavailable: fall back to the default
     }
-    (layers[saved] || (nl ? brt : streets)).addTo(map);
+    (layers[saved] || layers[this._t("map")]).addTo(map);
     map.on("baselayerchange", (ev) => {
       try {
         localStorage.setItem("shape_zones_layer", ev.name);
