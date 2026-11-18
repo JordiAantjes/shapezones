@@ -32,6 +32,17 @@ Then: Settings → Devices & services → Add integration → **Shape Zones**, a
 
 ## Adding zones
 
+### On the map (recommended)
+
+Open **Shape Zones** in the sidebar (admins only).
+
+- **New zone** puts a rectangle in the middle of the map. Drag its corners into place and drag ✥ to move it.
+- Untick **Keep it a rectangle** for any other shape: drag the small dots between corners to add a corner, and right-click (or double-click) a corner to remove it.
+- Click a zone on the map or in the list to edit or delete it.
+- Switch between map and aerial photo at the top right (in the Netherlands, PDOK's high-resolution aerial photo is the default). Your trackers are shown as pink dots, Home Assistant's own zones as dashed circles.
+
+### By coordinates
+
 Settings → Devices & services → Shape Zones → **Configure** → *Add zone*.
 
 Coordinates, one `lat, lon` per line:
@@ -80,7 +91,11 @@ triggers:
 ## Limitations
 
 - The built-in `zone` trigger and `zone.*` counters don't know shape zones; use the triggers above.
-- The default map card doesn't draw the shapes (the corners are in the sensor's `points` attribute).
+- The default map card doesn't draw the shapes (the corners are in the sensor's `points` attribute); use the Shape Zones page to see them.
+
+## Credits
+
+The map uses [Leaflet](https://leafletjs.com) (BSD 2-Clause, included in `frontend/leaflet/`), with tiles from OpenStreetMap, Esri and PDOK.
 
 ## Development
 

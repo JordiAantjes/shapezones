@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 
+from homeassistant.components import frontend, panel_custom
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 
 from .const import (
@@ -20,8 +23,15 @@ from .const import (
     DOMAIN,
 )
 from .geometry import ShapeZone
+from .websocket import async_register as async_register_websocket
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.DEVICE_TRACKER]
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+PANEL_URL_PATH = "shape-zones"
+STATIC_URL = "/shape_zones_static"
+FRONTEND_DIR = Path(__file__).parent / "frontend"
+VERSION = "0.2.0"
 
 
 @dataclass
@@ -52,6 +62,16 @@ def zone_unique_id(entry_id: str, zone_id: str) -> str:
     return f"{entry_id}_zone_{zone_id}"
 
 
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Register the websocket API and the files of the map panel."""
+    async_register_websocket(hass)
+    if hass.http is not None:
+        await hass.http.async_register_static_paths(
+            [StaticPathConfig(STATIC_URL, str(FRONTEND_DIR), cache_headers=False)]
+        )
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ShapeZonesConfigEntry) -> bool:
     """Set up Shape Zones from a config entry."""
     options = entry.options
@@ -74,12 +94,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ShapeZonesConfigEntry) -
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload))
+    await _async_register_panel(hass)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ShapeZonesConfigEntry) -> bool:
     """Unload a config entry."""
+    if "frontend" in hass.config.components:
+        frontend.async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def _async_register_panel(hass: HomeAssistant) -> None:
+    """Add the map editor to the sidebar (admins only)."""
+    if "frontend" not in hass.config.components:
+        return
+    await panel_custom.async_register_panel(
+        hass,
+        frontend_url_path=PANEL_URL_PATH,
+        webcomponent_name="shape-zones-panel",
+        sidebar_title="Shape Zones",
+        sidebar_icon="mdi:vector-square",
+        module_url=f"{STATIC_URL}/shape-zones-panel.js?v={VERSION}",
+        require_admin=True,
+        config_panel_domain=DOMAIN,
+    )
 
 
 async def _async_reload(hass: HomeAssistant, entry: ShapeZonesConfigEntry) -> None:
