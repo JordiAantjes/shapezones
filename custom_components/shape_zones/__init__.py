@@ -31,7 +31,7 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 PANEL_URL_PATH = "shape-zones"
 STATIC_URL = "/shape_zones_static"
 FRONTEND_DIR = Path(__file__).parent / "frontend"
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 
 @dataclass
@@ -99,15 +99,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ShapeZonesConfigEntry) -
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ShapeZonesConfigEntry) -> bool:
-    """Unload a config entry."""
-    if "frontend" in hass.config.components:
-        frontend.async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
+    """Unload a config entry.
+
+    The sidebar panel stays: an entry reloads after every change made on the
+    map, and removing the panel then would tear down the page being used.
+    """
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
+async def async_remove_entry(hass: HomeAssistant, entry: ShapeZonesConfigEntry) -> None:
+    """Remove the sidebar panel when the integration is deleted."""
+    if "frontend" in hass.config.components:
+        frontend.async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
+
+
 async def _async_register_panel(hass: HomeAssistant) -> None:
-    """Add the map editor to the sidebar (admins only)."""
+    """Add the map editor to the sidebar (admins only), once."""
     if "frontend" not in hass.config.components:
+        return
+    if PANEL_URL_PATH in hass.data.get(frontend.DATA_PANELS, {}):
         return
     await panel_custom.async_register_panel(
         hass,
@@ -117,7 +127,6 @@ async def _async_register_panel(hass: HomeAssistant) -> None:
         sidebar_icon="mdi:vector-square",
         module_url=f"{STATIC_URL}/shape-zones-panel.js?v={VERSION}",
         require_admin=True,
-        config_panel_domain=DOMAIN,
     )
 
 

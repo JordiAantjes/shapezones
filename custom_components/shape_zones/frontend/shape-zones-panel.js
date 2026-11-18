@@ -142,18 +142,17 @@ class ShapeZonesPanel extends HTMLElement {
   }
 
   set hass(hass) {
-    const first = !this._hass;
     this._hass = hass;
     if (this._menuButton) this._menuButton.hass = hass;
-    if (first) this._init();
-    else this._drawTrackers();
+    if (this._map) this._drawTrackers();
+    else this._maybeInit();
   }
 
   set narrow(narrow) {
     this._narrow = narrow;
     this.toggleAttribute("narrow", !!narrow);
     if (this._menuButton) this._menuButton.narrow = narrow;
-    if (this._map) setTimeout(() => this._map.invalidateSize(), 50);
+    if (this._map) setTimeout(() => this._map && this._map.invalidateSize(), 50);
   }
 
   set panel(_panel) {}
@@ -165,8 +164,21 @@ class ShapeZonesPanel extends HTMLElement {
     return s;
   }
 
+  connectedCallback() {
+    this._maybeInit();
+  }
+
+  disconnectedCallback() {
+    this._teardown();
+  }
+
+  _maybeInit() {
+    if (this._hass && this.isConnected && !this._initializing && !this._map) this._init();
+  }
+
   async _init() {
-    const root = this.attachShadow({ mode: "open" });
+    this._initializing = true;
+    const root = this.shadowRoot || this.attachShadow({ mode: "open" });
     root.innerHTML = `
       <link rel="stylesheet" href="${new URL("./leaflet/leaflet.css", import.meta.url)}">
       <style>${CSS}</style>
@@ -178,37 +190,50 @@ class ShapeZonesPanel extends HTMLElement {
     this._menuButton.narrow = this._narrow;
     root.getElementById("menu").appendChild(this._menuButton);
     this._side = root.getElementById("side");
+    this._edit = null;
+    this._trackerSignature = null;
     this._renderSide();
 
     // Leaflet needs a visible container with a size; HA may hand us hass before we are shown
     const mapDiv = root.getElementById("map");
-    await new Promise((resolve) => {
+    const visible = await new Promise((resolve) => {
       const ro = new ResizeObserver(() => {
-        if (mapDiv.clientWidth > 0 && mapDiv.clientHeight > 0) {
+        if (!this.isConnected) {
           ro.disconnect();
-          resolve();
+          resolve(false);
+        } else if (mapDiv.clientWidth > 0 && mapDiv.clientHeight > 0) {
+          ro.disconnect();
+          resolve(true);
         }
       });
       ro.observe(mapDiv);
+      this._pendingObserver = ro;
     });
-    this._setupMap(mapDiv);
-    new ResizeObserver(() => this._map.invalidateSize()).observe(mapDiv);
+    this._pendingObserver = null;
+    if (!visible || !this.isConnected) {
+      this._initializing = false;
+      return;
+    }
 
+    this._setupMap(mapDiv);
+    this._resizeObserver = new ResizeObserver(() => this._map && this._map.invalidateSize());
+    this._resizeObserver.observe(mapDiv);
     this._keyHandler = (ev) => {
       if (ev.key === "Escape" && this._edit) this._cancel();
     };
     window.addEventListener("keydown", this._keyHandler);
+    this._initializing = false;
 
     await this._load(true);
   }
 
-  disconnectedCallback() {
+  _teardown() {
+    if (this._pendingObserver) this._pendingObserver.disconnect();
+    if (this._resizeObserver) this._resizeObserver.disconnect();
     if (this._keyHandler) window.removeEventListener("keydown", this._keyHandler);
-  }
-
-  connectedCallback() {
-    if (this._keyHandler) window.addEventListener("keydown", this._keyHandler);
-    if (this._map) setTimeout(() => this._map.invalidateSize(), 50);
+    if (this._map) this._map.remove();
+    this._pendingObserver = this._resizeObserver = this._keyHandler = this._map = null;
+    this._initializing = false;
   }
 
   _setupMap(container) {
@@ -225,7 +250,7 @@ class ShapeZonesPanel extends HTMLElement {
     );
     const pdok = L.tileLayer(
       "https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg",
-      { minZoom: 6, maxNativeZoom: 21, maxZoom: 21, attribution: '&copy; <a href="https://www.pdok.nl/">PDOK</a> Beeldmateriaal.nl' }
+      { minZoom: 6, maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; <a href="https://www.pdok.nl/">PDOK</a> Beeldmateriaal.nl' }
     );
     const layers = { [this._t("map")]: osm, [this._t("aerial")]: esri };
     if (conf.country === "NL") layers[this._t("aerial_nl")] = pdok;
@@ -243,6 +268,7 @@ class ShapeZonesPanel extends HTMLElement {
   }
 
   async _load(fit = false) {
+    if (!this._map) return;
     try {
       const result = await this._hass.callWS({ type: "shape_zones/get" });
       this._zones = result.zones;
@@ -251,6 +277,7 @@ class ShapeZonesPanel extends HTMLElement {
     } catch (err) {
       this._error = err.code === "not_set_up" ? this._t("err_not_set_up") : err.message;
     }
+    if (!this._map) return; // page was closed while loading
     this._drawZones();
     this._drawTrackers();
     this._renderSide();
@@ -338,7 +365,6 @@ class ShapeZonesPanel extends HTMLElement {
     const handle = (cls, latlng, html = "") =>
       L.marker(latlng, {
         draggable: true,
-        autoPan: true,
         icon: L.divIcon({ className: "", html: `<div class="${cls}">${html}</div>`, iconSize: [0, 0] }),
       }).addTo(this._editLayer);
 
