@@ -23,6 +23,7 @@ const STRINGS = {
     err_not_set_up: "Shape Zones is not set up yet. Add the integration first.",
     saved: "Saved",
     map: "Map",
+    map_nl: "Map (NL, PDOK)",
     aerial: "Aerial photo",
     aerial_nl: "Aerial photo (NL, PDOK)",
     points: "{n} corners",
@@ -48,6 +49,7 @@ const STRINGS = {
     err_not_set_up: "Shape Zones is nog niet ingesteld. Voeg eerst de integratie toe.",
     saved: "Opgeslagen",
     map: "Kaart",
+    map_nl: "Kaart (NL, PDOK)",
     aerial: "Luchtfoto",
     aerial_nl: "Luchtfoto (NL, PDOK)",
     points: "{n} hoeken",
@@ -239,11 +241,22 @@ class ShapeZonesPanel extends HTMLElement {
   _setupMap(container) {
     const conf = this._hass.config;
     const map = L.map(container, { maxZoom: 21 });
-    const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxNativeZoom: 19,
-      maxZoom: 21,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    });
+    const dark = !!this._hass.themes?.darkMode;
+    // OpenStreetMap's own tile servers block apps that send no Referer (as HA does),
+    // so use CARTO (also used by HA's map card) and, in NL, PDOK.
+    const carto = L.tileLayer(
+      `https://basemaps.cartocdn.com/${dark ? "dark_all" : "rastertiles/voyager"}/{z}/{x}/{y}{r}.png`,
+      {
+        maxNativeZoom: 20,
+        maxZoom: 21,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      }
+    );
+    const brt = L.tileLayer(
+      "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png",
+      { minZoom: 6, maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; <a href="https://www.kadaster.nl">Kadaster</a> / PDOK' }
+    );
     const esri = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       { maxNativeZoom: 19, maxZoom: 21, attribution: "Tiles &copy; Esri" }
@@ -252,9 +265,27 @@ class ShapeZonesPanel extends HTMLElement {
       "https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg",
       { minZoom: 6, maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; <a href="https://www.pdok.nl/">PDOK</a> Beeldmateriaal.nl' }
     );
-    const layers = { [this._t("map")]: osm, [this._t("aerial")]: esri };
-    if (conf.country === "NL") layers[this._t("aerial_nl")] = pdok;
-    (conf.country === "NL" ? pdok : esri).addTo(map);
+    const nl = conf.country === "NL";
+    const layers = { [this._t("map")]: carto };
+    if (nl) layers[this._t("map_nl")] = brt;
+    layers[this._t("aerial")] = esri;
+    if (nl) layers[this._t("aerial_nl")] = pdok;
+
+    // remember the chosen background per browser
+    let saved = null;
+    try {
+      saved = localStorage.getItem("shape_zones_layer");
+    } catch (_err) {
+      // storage unavailable: fall back to the default
+    }
+    (layers[saved] || carto).addTo(map);
+    map.on("baselayerchange", (ev) => {
+      try {
+        localStorage.setItem("shape_zones_layer", ev.name);
+      } catch (_err) {
+        // ignore
+      }
+    });
     L.control.layers(layers, null, { position: "topright" }).addTo(map);
     L.control.scale({ imperial: false }).addTo(map);
 
