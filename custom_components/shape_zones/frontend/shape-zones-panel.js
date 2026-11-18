@@ -132,6 +132,7 @@ const CSS = `
   .zone-label { background: rgba(0,0,0,.6); color: white; border: none; box-shadow: none; font-weight: 500; }
   .zone-label::before { display: none; }
   .leaflet-container { font: inherit; }
+  .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.85); }
 `;
 
 class ShapeZonesPanel extends HTMLElement {
@@ -255,7 +256,14 @@ class ShapeZonesPanel extends HTMLElement {
       : esriTile("World_Street_Map", 19);
     const brt = L.tileLayer(
       "https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png",
-      { minZoom: 6, maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; <a href="https://www.kadaster.nl">Kadaster</a> / PDOK' }
+      {
+        minZoom: 6,
+        maxNativeZoom: 19,
+        maxZoom: 21,
+        // PDOK has no dark map: invert it in a dark theme (hue-rotate keeps water blue)
+        className: dark ? "dark-tiles" : "",
+        attribution: '&copy; <a href="https://www.kadaster.nl">Kadaster</a> / PDOK',
+      }
     );
     const esri = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
