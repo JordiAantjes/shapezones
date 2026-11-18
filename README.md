@@ -1,3 +1,5 @@
+<img src="icon.svg" alt="Shape Zones logo" width="96" align="right">
+
 # Shape Zones
 
 Rectangular and polygon zones for Home Assistant. Built-in zones are always circles, which fit a shop, a house or a plot badly. Shape Zones lets you draw them as they are and shows them on your person card ("Winkel" instead of "Away"), and you can use them in automations.

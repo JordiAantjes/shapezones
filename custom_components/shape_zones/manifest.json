@@ -15,7 +15,7 @@
   "issue_tracker": "https://github.com/JordiAantjes/shapezones/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "0.2.6",
+  "version": "0.2.7",
   "after_dependencies": [
     "frontend",
     "panel_custom"
