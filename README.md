@@ -24,7 +24,7 @@ When zones overlap, the smallest one wins (a shop inside a business park).
 
 ## Installation
 
-**HACS:** HACS → ⋮ → Custom repositories → add this repository's URL, category *Integration* → install **Shape Zones** → restart Home Assistant.
+**HACS:** HACS → ⋮ → Custom repositories → add `https://github.com/JordiAantjes/shapezones`, category *Integration* → install **Shape Zones** → restart Home Assistant. Updates then show up in HACS.
 
 **Manual:** copy `custom_components/shape_zones` to `config/custom_components/` and restart.
 
