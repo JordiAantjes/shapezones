@@ -1,0 +1,14 @@
+{
+  "domain": "shape_zones",
+  "name": "Shape Zones",
+  "codeowners": ["@jordiaantjes"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/jordiaantjes/shape-zones",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/jordiaantjes/shape-zones/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "0.1.0"
+}

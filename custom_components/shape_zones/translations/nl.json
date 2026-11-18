@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Te volgen trackers",
+        "description": "Kies de GPS-trackers (bijv. je telefoon uit de Companion-app). Shape Zones maakt per tracker een eigen tracker die de vormzone toont; koppel die aan de persoon in plaats van de originele.",
+        "data": {
+          "trackers": "Trackers"
+        }
+      }
+    },
+    "error": {
+      "empty": "Vul coördinaten in.",
+      "uneven_numbers": "Elk punt heeft een breedte- én een lengtegraad nodig.",
+      "out_of_range": "Breedtegraad moet tussen -90 en 90 liggen, lengtegraad tussen -180 en 180.",
+      "too_few_points": "Een zone heeft twee tegenoverliggende hoeken of minstens drie punten nodig.",
+      "invalid_geojson": "Dit is geen GeoJSON met een veelhoek erin.",
+      "name_exists": "Er bestaat al een zone met deze naam.",
+      "name_empty": "Vul een naam in.",
+      "own_tracker": "Kies de originele tracker, niet een Shape Zones-tracker."
+    },
+    "abort": {
+      "single_instance_allowed": "Shape Zones is al ingesteld. Voeg zones toe via Configureren."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Shape Zones",
+        "menu_options": {
+          "add_zone": "Zone toevoegen",
+          "pick_zone": "Zone bewerken",
+          "remove_zones": "Zones verwijderen",
+          "trackers": "Trackers",
+          "settings": "Instellingen"
+        }
+      },
+      "add_zone": {
+        "title": "Zone toevoegen",
+        "data": {
+          "name": "Naam",
+          "coordinates": "Coördinaten",
+          "icon": "Icoon"
+        },
+        "data_description": {
+          "coordinates": "Eén \"lat, lon\" per regel. Twee punten = een rechthoek met die twee tegenoverliggende hoeken; drie of meer = een veelhoek door de punten in volgorde. Je kunt ook GeoJSON van geojson.io plakken."
+        }
+      },
+      "pick_zone": {
+        "title": "Zone bewerken",
+        "data": {
+          "zone_id": "Zone"
+        }
+      },
+      "edit_zone": {
+        "title": "Zone bewerken",
+        "data": {
+          "name": "Naam",
+          "coordinates": "Coördinaten",
+          "icon": "Icoon"
+        },
+        "data_description": {
+          "coordinates": "Eén \"lat, lon\" per regel. Twee punten = een rechthoek met die twee tegenoverliggende hoeken; drie of meer = een veelhoek door de punten in volgorde. Je kunt ook GeoJSON van geojson.io plakken."
+        }
+      },
+      "remove_zones": {
+        "title": "Zones verwijderen",
+        "data": {
+          "zones": "Zones"
+        }
+      },
+      "trackers": {
+        "title": "Te volgen trackers",
+        "description": "Kies de GPS-trackers (bijv. je telefoon uit de Companion-app). Shape Zones maakt per tracker een eigen tracker die de vormzone toont; koppel die aan de persoon in plaats van de originele.",
+        "data": {
+          "trackers": "Trackers"
+        }
+      },
+      "settings": {
+        "title": "Instellingen",
+        "data": {
+          "max_accuracy": "Maximale GPS-onnauwkeurigheid",
+          "margin": "Randmarge"
+        },
+        "data_description": {
+          "max_accuracy": "Posities die minder nauwkeurig zijn dan dit laten een tracker niet een vormzone in- of uitgaan.",
+          "margin": "Je verlaat een zone pas als je zo ver buiten de rand bent, zodat GPS-ruis bij de rand de status niet laat wisselen."
+        }
+      }
+    },
+    "error": {
+      "empty": "Vul coördinaten in.",
+      "uneven_numbers": "Elk punt heeft een breedte- én een lengtegraad nodig.",
+      "out_of_range": "Breedtegraad moet tussen -90 en 90 liggen, lengtegraad tussen -180 en 180.",
+      "too_few_points": "Een zone heeft twee tegenoverliggende hoeken of minstens drie punten nodig.",
+      "invalid_geojson": "Dit is geen GeoJSON met een veelhoek erin.",
+      "name_exists": "Er bestaat al een zone met deze naam.",
+      "name_empty": "Vul een naam in.",
+      "own_tracker": "Kies de originele tracker, niet een Shape Zones-tracker."
+    }
+  }
+}

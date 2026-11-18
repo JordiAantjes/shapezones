@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Trackers to follow",
+        "description": "Pick the GPS trackers (e.g. your phone from the Companion app). For each one Shape Zones creates its own tracker that shows the shape zone; link that one to the person instead of the original.",
+        "data": {
+          "trackers": "Trackers"
+        }
+      }
+    },
+    "error": {
+      "empty": "Enter coordinates.",
+      "uneven_numbers": "Every point needs both a latitude and a longitude.",
+      "out_of_range": "Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "too_few_points": "A zone needs two opposite corners or at least three points.",
+      "invalid_geojson": "This is not GeoJSON with a polygon in it.",
+      "name_exists": "A zone with this name already exists.",
+      "name_empty": "Enter a name.",
+      "own_tracker": "Pick the original tracker, not a Shape Zones tracker."
+    },
+    "abort": {
+      "single_instance_allowed": "Shape Zones is already set up. Add zones via Configure."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Shape Zones",
+        "menu_options": {
+          "add_zone": "Add zone",
+          "pick_zone": "Edit zone",
+          "remove_zones": "Remove zones",
+          "trackers": "Trackers",
+          "settings": "Settings"
+        }
+      },
+      "add_zone": {
+        "title": "Add zone",
+        "data": {
+          "name": "Name",
+          "coordinates": "Coordinates",
+          "icon": "Icon"
+        },
+        "data_description": {
+          "coordinates": "One \"lat, lon\" per line. Two points = a rectangle with those opposite corners; three or more = a polygon through the points in order. You can also paste GeoJSON from geojson.io."
+        }
+      },
+      "pick_zone": {
+        "title": "Edit zone",
+        "data": {
+          "zone_id": "Zone"
+        }
+      },
+      "edit_zone": {
+        "title": "Edit zone",
+        "data": {
+          "name": "Name",
+          "coordinates": "Coordinates",
+          "icon": "Icon"
+        },
+        "data_description": {
+          "coordinates": "One \"lat, lon\" per line. Two points = a rectangle with those opposite corners; three or more = a polygon through the points in order. You can also paste GeoJSON from geojson.io."
+        }
+      },
+      "remove_zones": {
+        "title": "Remove zones",
+        "data": {
+          "zones": "Zones"
+        }
+      },
+      "trackers": {
+        "title": "Trackers to follow",
+        "description": "Pick the GPS trackers (e.g. your phone from the Companion app). For each one Shape Zones creates its own tracker that shows the shape zone; link that one to the person instead of the original.",
+        "data": {
+          "trackers": "Trackers"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "data": {
+          "max_accuracy": "Maximum GPS inaccuracy",
+          "margin": "Edge margin"
+        },
+        "data_description": {
+          "max_accuracy": "Position fixes less accurate than this don't move a tracker in or out of a shape zone.",
+          "margin": "You only leave a zone once you are this far outside it, so GPS jitter at the edge doesn't flip the state."
+        }
+      }
+    },
+    "error": {
+      "empty": "Enter coordinates.",
+      "uneven_numbers": "Every point needs both a latitude and a longitude.",
+      "out_of_range": "Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "too_few_points": "A zone needs two opposite corners or at least three points.",
+      "invalid_geojson": "This is not GeoJSON with a polygon in it.",
+      "name_exists": "A zone with this name already exists.",
+      "name_empty": "Enter a name.",
+      "own_tracker": "Pick the original tracker, not a Shape Zones tracker."
+    }
+  }
+}
